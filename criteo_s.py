@@ -11,7 +11,7 @@ def main(_):
                       initializer=tf.constant_initializer(0), trainable=False)
         dfm = deep_model.DeepFM() 
         filename = './criteo.txt'
-        features,labels = criteo_input.input_fn(filename) 
+        features,labels = criteo_input.input_fn(filename,batch_size=100) 
         feat_ids  = features['feat_ids']
         feat_ids = tf.reshape(feat_ids,shape=[-1,field_size])
         feat_vals = features['feat_vals']

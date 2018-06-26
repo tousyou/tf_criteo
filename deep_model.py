@@ -1,3 +1,7 @@
+"""
+copy from
+https://github.com/lambdaji/tf_repos/blob/master/deep_ctr/Model_pipeline/DeepFM.py
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -64,7 +68,6 @@ class DeepFM(object):
     def loss(self,y,labels):
         #--------build loss--------
         with tf.variable_scope('loss'):
-            cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y, labels=labels))
             loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y, labels=labels)) + \
                    self.l2_reg * tf.nn.l2_loss(self.FM_W) + \
                    self.l2_reg * tf.nn.l2_loss(self.FM_V)
@@ -78,7 +81,6 @@ class DeepFM(object):
 
     def train(self,loss,global_step):
         #--------build optimizer-------
-        #self.global_step = tf.Variable(0)
         optimizer = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999, epsilon=1e-8)
         train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op

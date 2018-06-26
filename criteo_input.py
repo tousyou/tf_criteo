@@ -1,4 +1,8 @@
-#!/usr/bin/env python
+"""
+copy from
+https://github.com/lambdaji/tf_repos/blob/master/deep_ctr/Model_pipeline/DeepFM.py
+"""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
