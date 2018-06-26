@@ -39,6 +39,8 @@ tf.app.flags.DEFINE_string("loss_type", 'log_loss', "loss type {square_loss, log
 tf.app.flags.DEFINE_string("optimizer", 'Adam', "optimizer type {Adam, Adagrad, GD, Momentum}")
 tf.app.flags.DEFINE_string("deep_layers", '256_128', "deep layers")
 tf.app.flags.DEFINE_string("dropout", '0.8_0.8', "dropout rate")
+tf.app.flags.DEFINE_integer("use_fm", 1, "use fm model")
+tf.app.flags.DEFINE_integer("use_deep", 1, "use deep_fm model")
 
 
 def main(_):
@@ -77,7 +79,15 @@ def main(_):
     l2_reg = FLAGS.l2_reg
     deep_layers = FLAGS.deep_layers
     dropout = FLAGS.dropout
-    
+
+    use_fm = True
+    use_deep = True
+    if FLAGS.use_fm == 0:
+        use_fm = False
+    if FLAGS.use_deep == 0:
+        use_deep = False
+    print('use_fm = {0}, use_deep = {1}'.format(use_fm,use_deep))
+     
     layers = FLAGS.deep_layers
     layers = [int(x) for x in layers.split('_')]
     dropout = FLAGS.dropout
@@ -98,7 +108,9 @@ def main(_):
                                     embedding_size = embedding_size,
                                     deep_layers = layers,
                                     dropout = dropout,
-                                    l2_reg = l2_reg)
+                                    l2_reg = l2_reg,
+                                    use_fm = use_fm,
+                                    use_deep = use_deep)
             #--------build feature--------
             features,labels = criteo_input.input_fn(filename,batch_size=batch_size,num_epochs=num_epochs)
             feat_ids  = features['feat_ids']
@@ -118,6 +130,7 @@ def main(_):
             #--------build train-------
             global_step = tf.train.get_or_create_global_step()
             train_op = dfm.train(loss,global_step)
+            init_op = tf.global_variables_initializer()
 
             # The StopAtStepHook handles stopping after running given steps.
             hooks=[tf.train.StopAtStepHook(last_step=1000000)]
@@ -129,16 +142,19 @@ def main(_):
                                            is_chief=(FLAGS.task_index == 0),
                                            checkpoint_dir=FLAGS.train_dir,
                                            hooks=hooks) as mon_sess:
+                mon_sess.run([init_op])
                 while not mon_sess.should_stop():
                     try:
                         _, lossval, step, aucval, _ = mon_sess.run([train_op,loss,global_step, auc, up_op])
                         if step % log_steps == 0:
                             print('step ={0}, loss = {1}, auc = {2}'.format(step, lossval,aucval))
                     except tf.errors.OutOfRangeError:
+                        print('****************one epoch**************')
                         break
 
 
 if __name__ == "__main__":
+    print('sys.argv = {0}'.format(sys.argv))
     tf.logging.set_verbosity(tf.logging.INFO)
     tf.app.run()
 

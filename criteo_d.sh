@@ -1,4 +1,4 @@
-py_cmd="Python/bin/python3 criteo_lr.py \
+py_cmd="Python/bin/python3 criteo_d.py \
 field_size=39 \
 feature_size=117581 \
 embedding_size=32 \
@@ -8,13 +8,15 @@ learning_rate=0.0001 \
 l2_reg=0.0001 \
 deep_layers=256_128 \
 dropout=0.8_0.8 \
-log_steps=100
+log_steps=10 \
+use_fm = 1 \
+use_deep = 1
 "
 
 TensorFlow_Submit \
---appName=lr_criteo   \
+--appName=deepfm_criteo   \
 --archives=hdfs://ns3-backup/user/dongsheng4/Python.zip#Python \
---files=./criteo_input.py,./deep_model.py,./criteo_lr.py \
+--files=./criteo_input.py,./deep_model.py,./criteo_d.py \
 --worker_memory=4096 \
 --ps_memory=4096 \
 --num_ps=1  \
